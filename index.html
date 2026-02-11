@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial Luxury Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="space-bg"></div>
+
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="orb"></div>
+                <h1>Quản lý đơn hàng OMS</h1>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="create-order">✨ Tạo đơn hàng</button>
+                <button class="nav-btn" data-tab="tracking">🚀 Theo dõi tồn kho</button>
+            </nav>
+            <div class="user-status">
+                <div class="avatar">Sales Admin</div>
+                <span>Chào buổi sáng</span>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section id="create-order" class="tab-content active">
+                <div class="welcome-text">
+                    <h2>Celestial ORDER</h2>
+                    <p>Khởi tạo giá trị đơn hàng mới trong hệ thống</p>
+                </div>
+                <div class="glass-card full-width">
+                    <div class="table-header">
+                        <h3>📋 Order History & Lifecycle</h3>
+                        <div class="filter-group">
+                            <span class="filter-label">Lọc trạng thái:</span>
+                            <button class="filter-btn active" data-filter="all">Tất cả</button>
+                            <button class="filter-btn" data-filter="Mới">✨ Mới</button>
+                            <button class="filter-btn" data-filter="Đang xử lý">🚀 Đang xử lý</button>
+                            <button class="filter-btn" data-filter="Hết hạn">⚠️ Hết hạn</button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-scroll">
+                        <table id="orderHistoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="glass-card form-container">
+                    <form id="orderForm">
+                        <div class="grid-form">
+                            <div class="input-field">
+                                <label>Tên khách hàng</label>
+                                <input type="text" id="customer" placeholder="V.I.P Client..." required>
+                            </div>
+                            <div class="input-field">
+                                <label>Tên sản phẩm</label>
+                            <input type="text" id="product_name" placeholder="CAO NƯỚC ATISO" required>
+                            </div>
+                            <div class="input-field">
+                                <label>Số lượng</label>
+                                <input type="number" id="quantity" placeholder="0" required>
+                            </div>
+                            <div class="input-field">
+                                <label>Quy cách</label>
+                                <input type="text" id="packing" placeholder="50 gói/thùng" required>
+                            </div>
+                            <div class="input-field">
+                                <label>Order ID (Auto-generated)</label>
+                                <input type="text" id="displayOrderID" readonly 
+                                       style="color: var(--accent); font-weight: 800; letter-spacing: 1px; border: 1px dashed var(--accent);">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit">CONFIRM ORDER</button>
+                    </form>
+                </div>
+            </section>
+
+
+            <section id="tracking" class="tab-content">
+                <div class="tracking-grid">
+                    <div class="glass-card table-box">
+                        <h3>🛸 MES Production Status</h3>
+                        <div class="table-scroll">
+                            <table id="mesTable">
+                                <thead><tr><th>Batch ID</th><th>Status</th><th>Progress</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="glass-card table-box">
+                        <h3>💎 WMS Real-time Stock</h3>
+                        <div class="table-scroll">
+                            <table id="wmsTable">
+                                <thead><tr><th>SKU</th><th>Available</th><th>Location</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
