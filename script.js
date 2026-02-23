@@ -1,6 +1,6 @@
 // --- 1. CẤU HÌNH & BIẾN TOÀN CỤC ---
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzexJMErjjqqrKJ2wrN1CGCdZayCjkzRI0t4sw7H2PiP3bM2qwc4nVOHYSjM7EkITsIPA/exec';
-const STATUS = { NEW: "Mới", PROCESSING: "Đang xử lý", EXPIRED: "Hết hạn" };
+const STATUS = { NEW: "MỚI", PROCESSING: "Đ.XỬ LÝ", EXPIRED: "HẾT HẠN" };
 const fieldsToWatch = ['customer', 'product_name', 'quantity', 'packing'];
 
 let allOrders = [
