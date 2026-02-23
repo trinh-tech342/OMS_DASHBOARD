@@ -1,5 +1,5 @@
 // --- 1. CẤU HÌNH & BIẾN TOÀN CỤC ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxB3OxE4B1vLrNQaT22puxqB4eX4-3XW2XaV0X6UKc2-k8x6mVdQt6WlCD5Z_oifIxJ8g/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzexJMErjjqqrKJ2wrN1CGCdZayCjkzRI0t4sw7H2PiP3bM2qwc4nVOHYSjM7EkITsIPA/exec';
 const STATUS = { NEW: "MỚI", PROCESSING: "Đ.XỬ LÝ", EXPIRED: "HẾT HẠN" };
 const fieldsToWatch = ['customer', 'product_name', 'quantity', 'packing'];
 
