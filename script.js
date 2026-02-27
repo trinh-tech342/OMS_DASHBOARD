@@ -11,36 +11,48 @@ let allOrders = [
 // --- 2. KHỞI CHẠY HỆ THỐNG (WINDOW ONLOAD) ---
 window.onload = () => {
     const orderIDInput = document.getElementById('displayOrderID');
-    if(orderIDInput) orderIDInput.value = ""; // Đảm bảo trống khi bắt đầu
+    if(orderIDInput) orderIDInput.value = ""; 
     
     renderOrderHistory(allOrders);
     loadMockData();
     
-    // Gán sự kiện lắng nghe cho các ô nhập liệu
-    fieldsToWatch.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.addEventListener('input', checkAndGenerateID);
+    // --- LẮNG NGHE SỰ KIỆN HỢP NHẤT ---
+    // Thay vì lặp qua từng ô, ta lắng nghe toàn bộ sự kiện nhập liệu trên trang
+    document.addEventListener('input', (e) => {
+        // 1. Nếu gõ vào ô Tên khách hàng (id="customer")
+        // 2. HOẶC gõ vào bất kỳ ô Tên sản phẩm nào có class "p-name"
+        if (e.target.id === 'customer' || e.target.classList.contains('p-name')) {
+            checkAndGenerateID();
+        }
     });
 };
-
-// --- 3. LOGIC TỰ ĐỘNG SINH MÃ ID ---
+// --- 3. LOGIC TỰ ĐỘNG SINH MÃ ID (PHIÊN BẢN HỢP NHẤT) ---
 function checkAndGenerateID() {
     const orderIDInput = document.getElementById('displayOrderID');
-    // Kiểm tra xem tất cả các ô đã được điền chưa
-    const isAllFilled = fieldsToWatch.every(id => {
-        const val = document.getElementById(id).value.trim();
-        return val !== "" && val !== "0";
-    });
+    if (!orderIDInput) return;
 
-    if (isAllFilled) {
+    // 1. Lấy tên khách hàng
+    const customer = document.getElementById('customer').value.trim();
+    
+    // 2. Lấy tên sản phẩm ở DÒNG ĐẦU TIÊN của bảng
+    const firstRowProduct = document.querySelector('.p-name');
+    const productName = firstRowProduct ? firstRowProduct.value.trim() : "";
+
+    // 3. Điều kiện sinh mã: Có khách hàng VÀ có tên sản phẩm đầu tiên
+    if (customer !== "" && productName !== "") {
         // Chỉ tạo mã mới nếu ô ID đang trống
         if (!orderIDInput.value) {
             orderIDInput.value = generateOrderID();
-            orderIDInput.style.animation = "pulse-gold 1s ease";
-            setTimeout(() => orderIDInput.style.animation = "", 1000);
+            
+            // Hiệu ứng nháy sáng cho chuyên nghiệp
+            orderIDInput.style.border = "1px solid var(--accent)";
+            orderIDInput.style.boxShadow = "0 0 15px var(--accent)";
+            setTimeout(() => {
+                orderIDInput.style.boxShadow = "none";
+            }, 1000);
         }
     } else {
-        // Nếu người dùng xóa bớt thông tin, xóa luôn ID
+        // Nếu xóa trắng thông tin cốt lõi thì xóa luôn ID
         orderIDInput.value = ""; 
     }
 }
@@ -54,8 +66,9 @@ function generateOrderID() {
     return `ORD-${datePart}-${randomPart}`;
 }
 
-// --- 4. XỬ LÝ SUBMIT (GỬI ĐƠN HÀNG) ---
+// --- 4.XỬ LÝ SUBMIT HỢP NHẤT (CHO NHIỀU SẢN PHẨM) ---
 const orderForm = document.getElementById('orderForm');
+
 if (orderForm) {
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -64,40 +77,64 @@ if (orderForm) {
         const orderIDInput = document.getElementById('displayOrderID');
         const originalText = btn.innerText;
 
+        // 1. Kiểm tra ID đã được sinh ra chưa
+        if (!orderIDInput.value) {
+            alert("Vui lòng điền đủ thông tin để hệ thống tạo mã Order ID!");
+            return;
+        }
+
         btn.innerText = "🚀 SENDING TO GALAXY...";
         btn.disabled = true;
 
-        // Thu thập dữ liệu
+        // 2. Thu thập danh sách sản phẩm từ các dòng
+        const items = [];
+        document.querySelectorAll('.item-row').forEach(row => {
+            items.push({
+                name: row.querySelector('.p-name').value,
+                qty: row.querySelector('.p-qty').value,
+                packing: row.querySelector('.p-packing').value
+            });
+        });
+
+        // 3. Gom dữ liệu cuối cùng
         const orderData = {
             orderID: orderIDInput.value,
             customer: document.getElementById('customer').value,
-            product: document.getElementById('product_name').value,
-            quantity: document.getElementById('quantity').value,
-            packing: document.getElementById('packing').value
+            products: items, // Đây là mảng chứa nhiều sản phẩm
+            timestamp: new Date().toLocaleString('vi-VN')
         };
 
+        // 4. Gửi lên Google Sheets (Web App)
         fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'no-cors', // Chế độ này không trả về nội dung response nhưng vẫn gửi data thành công
             body: JSON.stringify(orderData)
         })
         .then(() => {
             alert("✨ ORDER CONFIRMED!");
 
-            // 1. Thêm vào lịch sử hiển thị
+            // Cập nhật giao diện lịch sử (Hiển thị sản phẩm đầu tiên kèm ghi chú "+ thêm...")
             allOrders.unshift({
                 id: orderData.orderID,
                 customer: orderData.customer,
-                product: orderData.product,
+                product: items[0].name + (items.length > 1 ? ` (+${items.length - 1} món)` : ""),
                 status: STATUS.NEW
             });
             renderOrderHistory(allOrders);
 
-            // 2. Reset Form và ID
-            orderForm.reset(); 
-            orderIDInput.value = ""; // Quan trọng: Trả về trống để chờ đơn tiếp theo
+            // Reset Form: Xóa các dòng phụ, chỉ để lại 1 dòng trống
+            orderForm.reset();
+            const itemsBody = document.getElementById('itemsBody');
+            itemsBody.innerHTML = `
+                <tr class="item-row">
+                    <td><input type="text" class="p-name" placeholder="Tên SP" required></td>
+                    <td><input type="number" class="p-qty" placeholder="0" required></td>
+                    <td><input type="text" class="p-packing" placeholder="50 gói/thùng"></td>
+                    <td><button type="button" class="btn-remove" onclick="removeRow(this)">✕</button></td>
+                </tr>
+            `;
+            orderIDInput.value = "";
             
-            // 3. Khôi phục nút bấm
             btn.innerText = originalText;
             btn.disabled = false;
         })
@@ -109,7 +146,6 @@ if (orderForm) {
         });
     });
 }
-
 // --- 5. CÁC HÀM PHỤ TRỢ (HELPER FUNCTIONS) ---
 
 function renderOrderHistory(orders) {
@@ -159,3 +195,31 @@ function loadMockData() {
     const wms = document.querySelector('#wmsTable tbody');
     if (wms) wms.innerHTML = `<tr><td>ATI-50-T1</td><td>1,250</td><td>Zone A-12</td></tr>`;
 }
+// --- XỬ LÝ NÚT THÊM DÒNG VÀ XÓA DÒNG (Hợp nhất & Sửa lỗi) ---
+document.addEventListener('click', function(e) {
+    // 1. Xử lý Thêm dòng
+    if (e.target && e.target.id === 'addRowBtn') {
+        const tbody = document.getElementById('itemsBody');
+        const newRow = document.createElement('tr');
+        newRow.className = 'item-row';
+        // LƯU Ý: Đã bỏ onclick trong button để dùng Listener bên dưới
+        newRow.innerHTML = `
+            <td><input type="text" class="p-name" placeholder="Tên SP" required></td>
+            <td><input type="number" class="p-qty" placeholder="0" required></td>
+            <td><input type="text" class="p-packing" placeholder="50 gói/thùng"></td>
+            <td><button type="button" class="btn-remove">✕</button></td>
+        `;
+        tbody.appendChild(newRow);
+    }
+
+    // 2. Xử lý Xóa dòng (Sửa lỗi Uncaught ReferenceError)
+    if (e.target && e.target.classList.contains('btn-remove')) {
+        const rows = document.querySelectorAll('.item-row');
+        if (rows.length > 1) {
+            e.target.closest('tr').remove();
+            checkAndGenerateID(); // Cập nhật lại mã ID nếu cần
+        } else {
+            alert("⚠️ Đơn hàng phải có ít nhất 1 sản phẩm!");
+        }
+    }
+});
